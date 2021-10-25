@@ -14,7 +14,7 @@ Currently, you can only use legacy amino format with lcd.
 * Tools for server
 
 ### Backlog
-* protobuf and grpc
+* grpc and new lcd endpoints with protobuf
 * Support another platform (iOS / Android)
 * Multisig
 * Remote signature (e.g. Hashicorp Vault plugin)
