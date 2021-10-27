@@ -33,7 +33,7 @@ class TerraTest {
         println(transaction)
         assertTrue(broadcastResult.isSuccess)
 
-        val transactionResult = terra.waitTransaction(broadcastResult.transactionHash, 200, 4000, null).await()
+        val transactionResult = terra.waitTransaction(broadcastResult.transactionHash, 200, 4000, 100).await()
         println(transactionResult)
         assertTrue(transactionResult.isSuccess)
     }
@@ -50,7 +50,7 @@ class TerraTest {
         println(transaction)
         assertTrue(broadcastResult.isSuccess)
 
-        val transactionResult = terra.waitTransaction(broadcastResult.transactionHash, 200, 4000, null).await()
+        val transactionResult = terra.waitTransaction(broadcastResult.transactionHash, 200, 4000, 100).await()
         println(transactionResult)
         assertTrue(transactionResult.isSuccess)
     }
@@ -67,7 +67,7 @@ class TerraTest {
         println(transaction)
         assertTrue(broadcastResult.isSuccess)
 
-        val transactionResult = terra.waitTransaction(broadcastResult.transactionHash, 200, 4000, null).await()
+        val transactionResult = terra.waitTransaction(broadcastResult.transactionHash, 200, 4000, 100).await()
         println(transactionResult)
         assertTrue(transactionResult.isSuccess)
     }
@@ -90,7 +90,7 @@ class TerraTest {
         println(transaction)
         assertTrue(broadcastResult.isSuccess)
 
-        val transactionResult = terra.waitTransaction(broadcastResult.transactionHash, 200, 4000, null).await()
+        val transactionResult = terra.waitTransaction(broadcastResult.transactionHash, 200, 4000, 100).await()
         println(transactionResult)
         assertTrue(!transactionResult.isSuccess)
     }

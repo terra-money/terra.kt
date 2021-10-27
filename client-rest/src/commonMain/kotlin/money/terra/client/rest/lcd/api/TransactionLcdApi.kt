@@ -1,12 +1,12 @@
 package money.terra.client.rest.lcd.api
 
-import io.ktor.client.features.*
 import io.ktor.http.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import money.terra.client.rest.HttpClient
+import money.terra.client.rest.RestClientResponseException
 import money.terra.client.rest.api.*
 import money.terra.client.rest.model.Result
 import money.terra.model.CoinDecimal
@@ -25,8 +25,8 @@ class TransactionLcdApi(
     ): Deferred<TransactionResult?> = CoroutineScope(Dispatchers.Unconfined).async {
         try {
             client.get<TransactionResult>("/txs/$transactionHash").await()
-        } catch (e: ResponseException) {
-            if (e.response.status == HttpStatusCode.NotFound) {
+        } catch (e: RestClientResponseException) {
+            if (e.httpStatus == HttpStatusCode.NotFound.value) {
                 return@async null
             }
 

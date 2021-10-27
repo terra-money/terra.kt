@@ -86,7 +86,7 @@ class HttpClient(
 }
 
 class RestClientResponseException(
-    val httpCode: Int,
+    val httpStatus: Int,
     val responseBody: String,
     cause: Throwable?,
 ) : Exception("Occur error in rest request", cause)
