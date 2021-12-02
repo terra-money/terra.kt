@@ -8,7 +8,6 @@ import money.terra.sdk.tools.transaction.*
 import money.terra.wallet.TerraWallet
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
-import kotlin.math.min
 
 abstract class Broadcaster<Result : BroadcastResult>(
     var chainId: String,
@@ -43,10 +42,10 @@ abstract class Broadcaster<Result : BroadcastResult>(
         senderWallet: TerraWallet,
         message: Message,
         memo: String = "",
-        gasAmount: ULong? = null,
+        gasAmount: Long? = null,
         feeDenomination: String? = null,
-        accountNumber: ULong? = null,
-        sequence: ULong? = null,
+        accountNumber: Long? = null,
+        sequence: Long? = null,
         coroutineContext: CoroutineContext = Dispatchers.Default,
     ) = broadcast(
         senderWallet,
@@ -58,32 +57,33 @@ abstract class Broadcaster<Result : BroadcastResult>(
         coroutineContext,
     )
 
-    private suspend fun getAccountInfo(wallet: TerraWallet, accountNumber: ULong?, sequence: ULong?): AccountInfo = coroutineScope {
-        val accountInfo = async(start = CoroutineStart.LAZY) {
-            accountInfoProvider?.get(wallet.address) ?: throw BroadcastException.UnknownAccountInfo
+    private suspend fun getAccountInfo(wallet: TerraWallet, accountNumber: Long?, sequence: Long?): AccountInfo =
+        coroutineScope {
+            val accountInfo = async(start = CoroutineStart.LAZY) {
+                accountInfoProvider?.get(wallet.address) ?: throw BroadcastException.UnknownAccountInfo
+            }
+
+            val info = AccountInfo(
+                wallet.address,
+                accountNumber ?: accountInfo.await().accountNumber,
+                null,
+                sequence ?: accountInfo.await().sequence,
+            )
+
+            if (!accountInfo.isCompleted) {
+                accountInfo.cancel()
+            }
+
+            info
         }
-
-        val info = AccountInfo(
-            wallet.address,
-            accountNumber ?: accountInfo.await().accountNumber,
-            null,
-            sequence ?: accountInfo.await().sequence,
-        )
-
-        if (!accountInfo.isCompleted) {
-            accountInfo.cancel()
-        }
-
-        info
-    }
 
     open fun broadcast(
         senderWallet: TerraWallet,
         transaction: Transaction,
-        gasAmount: ULong? = null,
+        gasAmount: Long? = null,
         feeDenomination: String? = null,
-        accountNumber: ULong? = null,
-        sequence: ULong? = null,
+        accountNumber: Long? = null,
+        sequence: Long? = null,
         coroutineContext: CoroutineContext = Dispatchers.Default,
     ): Deferred<Pair<Result, Transaction>> = CoroutineScope(coroutineContext).async {
         @Suppress("LocalVariableName")
@@ -189,7 +189,7 @@ abstract class Broadcaster<Result : BroadcastResult>(
 
     @Throws(EstimateFeeException::class)
     fun Transaction.estimateFee(
-        gasAmount: ULong,
+        gasAmount: Long,
         feeDenomination: String? = null,
         dispatcher: CoroutineDispatcher = Dispatchers.Default,
     ): Deferred<Transaction> = CoroutineScope(dispatcher).async {
@@ -200,8 +200,8 @@ abstract class Broadcaster<Result : BroadcastResult>(
 
     private fun Transaction.sign(
         wallet: TerraWallet,
-        accountNumber: ULong,
-        sequence: ULong,
+        accountNumber: Long,
+        sequence: Long,
         dispatcher: CoroutineDispatcher = Dispatchers.Default,
     ): Deferred<Transaction> = CoroutineScope(dispatcher).async {
         val signatures = signatures?.toMutableList() ?: mutableListOf()

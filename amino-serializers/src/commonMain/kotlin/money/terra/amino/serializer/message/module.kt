@@ -200,6 +200,10 @@ val WasmSerializersModule = SerializersModule {
             ExecuteContractMessage::class,
             AminoSerializer(ExecuteContractMessage.serializer(), "wasm/MsgExecuteContract"),
         )
+//        subclass(
+//            JsonExecuteContractMessage::class,
+//            AminoSerializer(JsonExecuteContractMessage.serializer(), "wasm/MsgExecuteContract"),
+//        )
         subclass(
             MigrateContractMessage::class,
             AminoSerializer(MigrateContractMessage.serializer(), "wasm/MsgMigrateContract"),

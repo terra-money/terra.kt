@@ -7,15 +7,17 @@ import money.terra.sdk.TerraBase
 import money.terra.sdk.tools.transaction.AccountInfo
 import money.terra.wallet.TerraWallet
 import kotlin.coroutines.CoroutineContext
+import kotlin.jvm.JvmOverloads
 
 abstract class ConnectedTerraWallet(val terra: TerraBase, val origin: TerraWallet) : TerraWallet by origin {
 
+    @JvmOverloads
     open fun broadcast(
         transaction: Transaction,
-        gasAmount: ULong? = null,
+        gasAmount: Long? = null,
         feeDenomination: String? = null,
-        accountNumber: ULong? = null,
-        sequence: ULong? = null,
+        accountNumber: Long? = null,
+        sequence: Long? = null,
         coroutineContext: CoroutineContext = Dispatchers.Default,
     ) = terra.broadcaster.broadcast(
         this,
@@ -27,11 +29,12 @@ abstract class ConnectedTerraWallet(val terra: TerraBase, val origin: TerraWalle
         coroutineContext,
     )
 
+    @JvmOverloads
     open fun broadcast(
-        gasAmount: ULong? = null,
+        gasAmount: Long? = null,
         feeDenomination: String? = null,
-        accountNumber: ULong? = null,
-        sequence: ULong? = null,
+        accountNumber: Long? = null,
+        sequence: Long? = null,
         coroutineContext: CoroutineContext = Dispatchers.Default,
         transactionBuilder: Transaction.Builder.() -> Unit,
     ) = broadcast(

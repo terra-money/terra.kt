@@ -34,6 +34,8 @@ expect fun Uint128.toDecimal(): Decimal
 
 expect fun Uint128.scaled(scale: Int = TERRA_DECIMAL_SCALE): Decimal
 
+fun Long.toUint128(): Uint128 = Uint128(toString())
+
 fun ULong.toUint128(): Uint128 = Uint128(toString())
 
 object Uint128Serializer : KSerializer<Uint128> {

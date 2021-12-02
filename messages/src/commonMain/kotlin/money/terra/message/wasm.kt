@@ -3,12 +3,12 @@ package money.terra.message
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.LongAsStringSerializer
 import kotlinx.serialization.json.JsonObject
 import money.terra.model.Coin
 import money.terra.model.EnumMessage
 import money.terra.model.Message
 import money.terra.type.Binary
-import money.terra.type.ULongAsStringSerializer
 
 @Serializable
 data class StoreCodeMessage(
@@ -18,7 +18,7 @@ data class StoreCodeMessage(
 
 @Serializable
 data class MigrateCodeMessage(
-    @SerialName("code_id") @Serializable(ULongAsStringSerializer::class) val codeId: ULong,
+    @SerialName("code_id") @Serializable(LongAsStringSerializer::class) val codeId: Long,
     val sender: String,
     @SerialName("wasm_byte_code") @Contextual val wasmByteCode: Binary,
 ) : Message()
@@ -26,7 +26,7 @@ data class MigrateCodeMessage(
 @Serializable
 data class InstantiateContractMessage(
     val sender: String,
-    @SerialName("code_id") @Serializable(ULongAsStringSerializer::class) val codeId: ULong,
+    @SerialName("code_id") @Serializable(LongAsStringSerializer::class) val codeId: Long,
     @SerialName("init_msg") val message: JsonObject,
     @SerialName("init_coins") val funds: List<Coin> = emptyList(),
     val admin: String? = null,
@@ -36,15 +36,23 @@ data class InstantiateContractMessage(
 data class ExecuteContractMessage(
     val sender: String,
     val contract: String,
-    @SerialName("execute_msg") @Contextual val message: EnumMessage,
+    @SerialName("execute_msg") @Contextual val message: JsonObject,
     @SerialName("coins") val funds: List<Coin> = emptyList(),
 ) : Message()
+
+//@Serializable
+//data class JsonExecuteContractMessage(
+//    val sender: String,
+//    val contract: String,
+//    @SerialName("execute_msg") @Contextual val message: JsonObject,
+//    @SerialName("coins") val funds: List<Coin> = emptyList(),
+//) : Message()
 
 @Serializable
 data class MigrateContractMessage(
     val admin: String,
     val contract: String,
-    @SerialName("new_code_id") @Serializable(ULongAsStringSerializer::class) val newCodeId: ULong,
+    @SerialName("new_code_id") @Serializable(LongAsStringSerializer::class) val newCodeId: Long,
     @SerialName("migrate_msg") val message: JsonObject,
 ) : Message()
 

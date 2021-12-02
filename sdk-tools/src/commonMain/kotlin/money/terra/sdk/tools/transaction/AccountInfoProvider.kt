@@ -2,8 +2,8 @@ package money.terra.sdk.tools.transaction
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.LongAsStringSerializer
 import money.terra.model.PublicKey
-import money.terra.type.ULongAsStringSerializer
 
 interface AccountInfoProvider {
 
@@ -17,7 +17,7 @@ interface AccountInfoProvider {
 @Serializable
 data class AccountInfo(
     val address: String,
-    @SerialName("account_number") @Serializable(ULongAsStringSerializer::class) val accountNumber: ULong = 0u,
+    @SerialName("account_number") @Serializable(LongAsStringSerializer::class) val accountNumber: Long = 0,
     @SerialName("public_key") val publicKey: PublicKey? = null,
-    @Serializable(ULongAsStringSerializer::class) val sequence: ULong = 0u,
+    @Serializable(LongAsStringSerializer::class) val sequence: Long = 0,
 )

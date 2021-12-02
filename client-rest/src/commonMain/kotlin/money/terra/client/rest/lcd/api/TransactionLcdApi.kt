@@ -49,8 +49,8 @@ class TransactionLcdApi(
     override fun estimateFee(
         messages: List<Message>,
         senderAddress: String,
-        senderAccountNumber: ULong,
-        senderSequence: ULong,
+        senderAccountNumber: Long,
+        senderSequence: Long,
         gasPrices: List<CoinDecimal>,
         gasAdjustment: Float,
     ): Deferred<Result<EstimateFeeResult>> = client.post(

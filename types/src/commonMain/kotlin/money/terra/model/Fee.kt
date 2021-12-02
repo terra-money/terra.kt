@@ -2,10 +2,10 @@ package money.terra.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import money.terra.type.ULongAsStringSerializer
+import kotlinx.serialization.builtins.LongAsStringSerializer
 
 @Serializable
 data class Fee(
-    @SerialName("gas") @Serializable(ULongAsStringSerializer::class) val gasAmount: ULong,
+    @SerialName("gas") @Serializable(LongAsStringSerializer::class) val gasAmount: Long,
     @SerialName("amount") val feeAmount: List<Coin>,
 )

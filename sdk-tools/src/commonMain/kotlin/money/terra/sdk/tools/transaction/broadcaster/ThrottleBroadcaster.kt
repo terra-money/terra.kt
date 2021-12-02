@@ -60,10 +60,10 @@ class ThrottleBroadcaster<Result : BroadcastResult>(
         senderWallet: TerraWallet,
         message: Message,
         memo: String,
-        gasAmount: ULong?,
+        gasAmount: Long?,
         feeDenomination: String?,
-        accountNumber: ULong?,
-        sequence: ULong?,
+        accountNumber: Long?,
+        sequence: Long?,
         coroutineContext: CoroutineContext,
     ): Deferred<Pair<Result, Transaction>> {
         val result = CompletableDeferred<Pair<Result, Transaction>>()
@@ -90,10 +90,10 @@ class ThrottleBroadcaster<Result : BroadcastResult>(
     override fun broadcast(
         senderWallet: TerraWallet,
         transaction: Transaction,
-        gasAmount: ULong?,
+        gasAmount: Long?,
         feeDenomination: String?,
-        accountNumber: ULong?,
-        sequence: ULong?,
+        accountNumber: Long?,
+        sequence: Long?,
         coroutineContext: CoroutineContext,
     ): Deferred<Pair<Result, Transaction>> {
         val result = CompletableDeferred<Pair<Result, Transaction>>()
@@ -251,7 +251,7 @@ class LocalBroadcastQueue<Result : BroadcastResult>(
 data class TransactionQueueItem<Result : BroadcastResult>(
     val wallet: TerraWallet,
     val transaction: Transaction,
-    val gasAmount: ULong?,
+    val gasAmount: Long?,
     val feeDenomination: String?,
     val result: CompletableDeferred<Pair<Result, Transaction>>,
 )
@@ -260,7 +260,7 @@ data class MessageQueueItem<Result : BroadcastResult>(
     val wallet: TerraWallet,
     val message: Message,
     val memo: String,
-    val gasAmount: ULong?,
+    val gasAmount: Long?,
     val feeDenomination: String?,
     val result: CompletableDeferred<Pair<Result, Transaction>>,
 )

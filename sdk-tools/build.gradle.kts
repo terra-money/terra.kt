@@ -1,5 +1,5 @@
 plugins {
-    kotlin("plugin.serialization") version "1.5.30"
+    kotlin("plugin.serialization") version "1.6.0"
 }
 
 kotlin {
@@ -16,6 +16,13 @@ kotlin {
 
                 api(project(":types"))
                 implementation(project(":wallet"))
+            }
+        }
+        val jvmMain by getting {
+            dependencies {
+                val kotlinxCoroutineVersion: String by project
+
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:$kotlinxCoroutineVersion")
             }
         }
     }

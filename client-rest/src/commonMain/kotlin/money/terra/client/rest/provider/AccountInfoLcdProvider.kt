@@ -43,7 +43,7 @@ abstract class CachedAccountInfoProvider(
 
     override suspend fun increaseSequence(walletAddress: String) {
         getCached(walletAddress)?.let {
-            setCache(walletAddress, it.copy(sequence = it.sequence + 1u))
+            setCache(walletAddress, it.copy(sequence = it.sequence + 1))
         }
     }
 }

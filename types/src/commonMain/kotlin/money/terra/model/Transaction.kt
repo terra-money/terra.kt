@@ -3,7 +3,7 @@ package money.terra.model
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import money.terra.type.ULongAsStringSerializer
+import kotlinx.serialization.builtins.LongAsStringSerializer
 import kotlin.jvm.JvmStatic
 
 @Serializable
@@ -13,7 +13,7 @@ data class Transaction(
     val memo: String = "",
     val fee: Fee? = null,
     val signatures: List<Signature>? = null,
-    @SerialName("timeout_height") @Serializable(ULongAsStringSerializer::class) val timeoutHeight: ULong = 0u,
+    @SerialName("timeout_height") @Serializable(LongAsStringSerializer::class) val timeoutHeight: Long = 0,
 ) {
     val isSigned: Boolean
         get() = signatures?.isNotEmpty() == true

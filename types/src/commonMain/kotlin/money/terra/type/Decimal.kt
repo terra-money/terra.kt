@@ -36,6 +36,8 @@ expect fun Decimal.toUint128(): Uint128
 
 expect fun Decimal.unscaled(scale: Int = TERRA_DECIMAL_SCALE): Uint128
 
+fun Long.toDecimal(): Decimal = Decimal(toString())
+
 fun ULong.toDecimal(): Decimal = Decimal(toString())
 
 object DecimalSerializer : KSerializer<Decimal> {

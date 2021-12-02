@@ -22,7 +22,7 @@ class AuthLcdApi(
                 client.get<Result<TypeWrapper<AccountInfo?>>>("/auth/accounts/$address").await()
             } catch (e: SerializationException) {
                 if (e.message?.endsWith("missing") == true) {
-                    return@async Result(0u, TypeWrapper("core/Account", null))
+                    return@async Result(0, TypeWrapper("core/Account", null))
                 }
 
                 throw e

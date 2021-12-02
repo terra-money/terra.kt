@@ -3,11 +3,11 @@ package money.terra.sdk.tools.transaction
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.LongAsStringSerializer
 import money.terra.model.Fee
 import money.terra.model.Message
 import money.terra.model.Signature
 import money.terra.model.Transaction
-import money.terra.type.ULongAsStringSerializer
 import money.terra.wallet.TerraWallet
 
 interface TransactionSigner {
@@ -18,8 +18,8 @@ interface TransactionSigner {
 @Serializable
 data class TransactionSignData(
     @SerialName("chain_id") val chainId: String,
-    @SerialName("account_number") @Serializable(ULongAsStringSerializer::class) val accountNumber: ULong,
-    @Serializable(ULongAsStringSerializer::class) val sequence: ULong,
+    @SerialName("account_number") @Serializable(LongAsStringSerializer::class) val accountNumber: Long,
+    @Serializable(LongAsStringSerializer::class) val sequence: Long,
     val fee: Fee,
     @SerialName("msgs") val messages: List<@Contextual Message>,
     val memo: String,
@@ -28,8 +28,8 @@ data class TransactionSignData(
     constructor(
         transaction: Transaction,
         chainId: String,
-        accountNumber: ULong,
-        sequence: ULong,
+        accountNumber: Long,
+        sequence: Long,
     ) : this(
         chainId,
         accountNumber,

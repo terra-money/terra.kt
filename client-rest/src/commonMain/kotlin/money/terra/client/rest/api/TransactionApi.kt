@@ -4,10 +4,10 @@ import kotlinx.coroutines.Deferred
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.LongAsStringSerializer
 import money.terra.client.rest.model.BaseRequest
 import money.terra.client.rest.model.Result
 import money.terra.model.*
-import money.terra.type.ULongAsStringSerializer
 
 @Deprecated("Legacy endpoint will deprecate. Use new proto style endpoints.")
 interface TransactionApi {
@@ -23,8 +23,8 @@ interface TransactionApi {
     fun estimateFee(
         messages: List<Message>,
         senderAddress: String,
-        senderAccountNumber: ULong,
-        senderSequence: ULong,
+        senderAccountNumber: Long,
+        senderSequence: Long,
         gasPrices: List<CoinDecimal>,
         gasAdjustment: Float,
     ): Deferred<Result<EstimateFeeResult>>
@@ -87,14 +87,14 @@ data class BroadcastSyncResult(
 
 @Serializable
 data class BroadcastBlockResult(
-    @Serializable(ULongAsStringSerializer::class) val height: ULong,
+    @Serializable(LongAsStringSerializer::class) val height: Long,
     @SerialName("txhash") override val transactionHash: String,
     @SerialName("codespace") override val codeSpace: String? = null,
     override val code: Int? = null,
     @SerialName("raw_log") override val rawLog: String? = null,
     override val logs: List<TransactionLog>? = null,
-    val gasUsed: ULong? = null,
-    val gasWanted: ULong? = null,
+    val gasUsed: Long? = null,
+    val gasWanted: Long? = null,
 ) : BroadcastResult
 
 @Serializable
@@ -107,8 +107,8 @@ data class EstimateFeeRequest(
         messages: List<Message>,
         chainId: String,
         requester: String,
-        requesterAccountNumber: ULong,
-        requesterSequence: ULong,
+        requesterAccountNumber: Long,
+        requesterSequence: Long,
         gasPrices: List<CoinDecimal>,
         gasAdjustment: Float,
     ) : this(

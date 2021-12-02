@@ -2,8 +2,8 @@ package money.terra.sdk.tools.transaction.broadcaster
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.LongAsStringSerializer
 import money.terra.model.TransactionLog
-import money.terra.type.ULongAsStringSerializer
 
 interface BroadcastResult {
     val transactionHash: String
@@ -36,12 +36,12 @@ data class BroadcastSyncResult(
 
 @Serializable
 data class BroadcastBlockResult(
-    @Serializable(ULongAsStringSerializer::class) val height: ULong,
+    @Serializable(LongAsStringSerializer::class) val height: Long,
     @SerialName("txhash") override val transactionHash: String,
     @SerialName("codespace") override val codeSpace: String? = null,
     override val code: Int? = null,
     @SerialName("raw_log") override val rawLog: String? = null,
     override val logs: List<TransactionLog>? = null,
-    val gasUsed: ULong? = null,
-    val gasWanted: ULong? = null,
+    val gasUsed: Long? = null,
+    val gasWanted: Long? = null,
 ) : BroadcastResult

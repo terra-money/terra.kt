@@ -11,8 +11,8 @@ import money.terra.type.toUint128
 class EstimateFeeException(
     val messages: List<Message>,
     val requesterAddress: String,
-    val requesterAccountNumber: ULong,
-    val requesterSequence: ULong,
+    val requesterAccountNumber: Long,
+    val requesterSequence: Long,
     val gasPrices: List<CoinDecimal>,
     val gasAdjustment: Float,
     val reason: String,
@@ -38,8 +38,8 @@ abstract class FeeEstimator {
     suspend fun estimate(
         messages: List<Message>,
         senderAddress: String,
-        senderAccountNumber: ULong,
-        senderSequence: ULong,
+        senderAccountNumber: Long,
+        senderSequence: Long,
         feeDenomination: String = defaultFeeDenomination,
         gasAdjustment: Float = defaultGasAdjustment,
     ): Fee {
@@ -55,7 +55,7 @@ abstract class FeeEstimator {
         )
     }
 
-    suspend fun estimate(gasAmount: ULong, feeDenomination: String = defaultFeeDenomination): Fee {
+    suspend fun estimate(gasAmount: Long, feeDenomination: String = defaultFeeDenomination): Fee {
         val gasPrice = gasPricesProvider.get(feeDenomination)
         val feeAmount = (gasAmount.toDecimal() * gasPrice).toUint128()
 
@@ -66,8 +66,8 @@ abstract class FeeEstimator {
     protected abstract suspend fun estimate(
         messages: List<Message>,
         senderAddress: String,
-        senderAccountNumber: ULong,
-        senderSequence: ULong,
+        senderAccountNumber: Long,
+        senderSequence: Long,
         gasPrices: List<CoinDecimal>,
         gasAdjustment: Float,
     ): Fee
