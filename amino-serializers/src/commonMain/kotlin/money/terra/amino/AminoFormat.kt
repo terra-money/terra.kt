@@ -49,6 +49,8 @@ object AminoFormat : StringFormat {
         } else {
             serializersModule + module
         }
+
+        json = createJsonFormat()
     }
 
     private fun createJsonFormat() = Json {

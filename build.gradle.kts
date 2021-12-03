@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "money.terra"
-version = "0.20.2"
+version = "0.20.3-SNAPSHOT"
 
 allprojects {
     apply {
