@@ -1,4 +1,6 @@
 # Terra Kotlin SDK
+[![Maven Central](https://img.shields.io/maven-central/v/money.terra/sdk)](https://mvnrepository.com/artifact/money.terra/sdk)
+
 The Terra Software Development Kit (SDK) in Kotlin is a simple library toolkit for building software that can interact
 with the Terra blockchain and provides simple abstractions over core data structures, serialization, and API request generation.
 
@@ -7,7 +9,7 @@ terra.kt is refactoring for applying protobuf and grpc.
 Currently, you can only use legacy amino format with lcd.
 
 ## Features
-* Wallet Tools
+* Wallet Tools <small>(e.g. signature verification)</small>
 * Amino
   * LCD, FCD Client
   * Sign with amino format
