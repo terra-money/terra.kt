@@ -10,6 +10,7 @@ import money.terra.sdk.tools.transaction.broadcaster.isSuccess
 import money.terra.type.Uint128
 import util.runBlockingTest
 import kotlin.test.Test
+import kotlin.test.AfterTest
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
@@ -20,6 +21,11 @@ class TerraTest {
         logger = Logger.SIMPLE
     })
     private val options = AminoTerraOptions("bombay-12", TerraFcdClient("bombay-12", client))
+
+    @AfterTest
+    fun delay() {
+        Thread.sleep(1000) //Delay each test for public node syncing
+    }
 
     @Test
     fun broadcastAsync() = runBlockingTest {
@@ -83,7 +89,7 @@ class TerraTest {
             }.await()
         }
 
-        val (broadcastResult, transaction) = wallet.broadcast(gasAmount = 100000u) {
+        val (broadcastResult, transaction) = wallet.broadcast(gasAmount = 100000) {
             SendMessage(wallet.address, wallet.address, listOf(Coin("ulu", Uint128("1")))).withThis()
         }.await()
         println(broadcastResult)

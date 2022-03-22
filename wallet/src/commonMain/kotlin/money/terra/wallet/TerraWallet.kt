@@ -6,6 +6,7 @@ import kr.jadekim.common.hash.SHA_256
 import money.terra.key.Key
 import money.terra.key.MnemonicKey
 import money.terra.key.MnemonicKey.Companion.COIN_TYPE
+import money.terra.key.PublicKey
 import money.terra.key.RawKey
 import money.terra.util.Bech32
 import money.terra.util.Bech32Hrp
@@ -59,6 +60,8 @@ interface TerraWallet {
 }
 
 fun TerraWallet(address: String): TerraWallet = TerraWalletImpl(address)
+
+fun TerraWallet(publicKey: ByteArray): TerraWallet = TerraWalletImpl(PublicKey(publicKey))
 
 fun TerraWallet(key: Key): TerraWallet = TerraWalletImpl(key)
 
