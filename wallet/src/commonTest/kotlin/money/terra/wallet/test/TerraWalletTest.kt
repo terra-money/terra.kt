@@ -58,6 +58,12 @@ class TerraWalletTest {
         assertEquals(ZERO_END_PRIVATE_KEY.privateKeyHex, (wallet2.key as RawKey).privateKeyHex)
         assertEquals(ZERO_END_PRIVATE_KEY.publicKeyHex, (wallet2.key as RawKey).publicKeyHex)
         assertEquals(ZERO_END_PRIVATE_KEY.publicKeyBech32, wallet2.key!!.accountPublicKey)
+
+        val wallet3 = TerraWallet.fromRawKey(ZERO_TRIM_PRIVATE_KEY.privateKeyHex)
+        assertEquals(ZERO_TRIM_PRIVATE_KEY.address, wallet3.address)
+        assertEquals("00" + ZERO_TRIM_PRIVATE_KEY.privateKeyHex, (wallet3.key as RawKey).privateKeyHex)
+        assertEquals(ZERO_TRIM_PRIVATE_KEY.publicKeyHex, (wallet3.key as RawKey).publicKeyHex)
+        assertEquals(ZERO_TRIM_PRIVATE_KEY.publicKeyBech32, wallet3.key!!.accountPublicKey)
     }
 
     @Test

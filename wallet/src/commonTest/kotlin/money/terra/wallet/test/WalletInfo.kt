@@ -23,3 +23,11 @@ val ZERO_END_PRIVATE_KEY = WalletInfo(
     publicKeyHex = "02BE1834E13E4746625DDB8FABC50DB9AFE4A16C3EC0D1B35784F887726C1AB683",
     publicKeyBech32 = "terrapub1addwnpepq2lpsd8p8er5vcjamw86h3gdhxh7fgtv8mqdrv6hsnugwunvr2mgx4amne5",
 )
+
+val ZERO_TRIM_PRIVATE_KEY = WalletInfo(
+    address = "terra1utate92dqgewpghfyfpwynqz6lm9eqrpquqvp9",
+    mnemonic = "carpet knock april poem maid tool seat motor meat answer october brain audit order six birth organ harsh oyster ankle drift protect possible gallery",
+    privateKeyHex = "CEC161403FF971FFA7B4BE83FC1C569BE61C2EF3C41898A8D21EF08077C88C31",
+    publicKeyHex = "030D56FC5BED3E709E2F2A8515698F230B7CDBBB60CA0403B2D0D06D4968682DDE",
+    publicKeyBech32 = "terrapub1addwnpepqvx4dlzma5l8p83092z326v0yv9hekamvr9qgqaj6rgx6jtgdqkaunptz9c",
+)

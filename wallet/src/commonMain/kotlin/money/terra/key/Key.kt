@@ -64,7 +64,15 @@ open class MnemonicKey(
     }
 }
 
-private fun ByteArray.toFixedSize(length: Int) = ByteArray(length).also { copyInto(it) }
+private fun ByteArray.toFixedSize(length: Int) = ByteArray(length) {
+    val padLength = length - size
+
+    if (padLength - it > 0) {
+        0.toByte()
+    } else {
+        get(it - padLength)
+    }
+}
 
 private fun mnemonicToKeyPair(mnemonic: String, account: Int, index: Int, coinType: Int): Bip32KeyPair {
     val seed = Mnemonic.seedFrom(mnemonic)
