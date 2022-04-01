@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package org.bitcoinj.core;
+package shadow.org.bitcoinj.core;
 
 import java.io.ByteArrayOutputStream;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Locale;
 

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.bitcoinj.core;
+package shadow.org.bitcoinj.core;
 
 public class AddressFormatException extends IllegalArgumentException {
     public AddressFormatException() {
