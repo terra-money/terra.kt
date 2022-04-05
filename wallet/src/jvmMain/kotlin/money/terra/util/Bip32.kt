@@ -21,7 +21,8 @@ actual object Bip32 {
     }
 
     actual fun publicKeyFor(privateKey: ByteArray): ByteArray {
-        return Sign.publicPointFromPrivate(BigInteger(1, privateKey)).getEncoded(true)
+        val point = Sign.publicPointFromPrivate(BigInteger(1, privateKey))
+        return point.getEncoded(true)
     }
 
     actual fun sign(messageHash: ByteArray, privateKey: ByteArray): ByteArray {
@@ -50,7 +51,14 @@ actual object Bip32 {
 
     actual fun recoverPublicKey(messageHash: ByteArray, signature: ByteArray): ByteArray {
         val (r, s) = splitRandS(signature)
+        val signatureData = Sign.SignatureData(byteArrayOf(27.toByte()), r, s)
+        val uncompressedPublicKey = Sign.signedMessageHashToKey(messageHash, signatureData).toByteArray()
+        val encodedPublicKey = ByteArray(uncompressedPublicKey.size + 1)
+        encodedPublicKey[0] = 0x04
+        uncompressedPublicKey.copyInto(encodedPublicKey, 1)
 
-        return Sign.signedMessageToKey(messageHash, Sign.SignatureData(byteArrayOf(), r, s)).toByteArray()
+        val point = CURVE.curve.decodePoint(encodedPublicKey)
+
+        return point.getEncoded(true)
     }
 }

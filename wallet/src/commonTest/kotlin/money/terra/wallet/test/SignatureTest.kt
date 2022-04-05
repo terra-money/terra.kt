@@ -1,6 +1,7 @@
 package money.terra.wallet.test
 
 import kr.jadekim.common.encoder.encodeBase64
+import money.terra.key.PublicKey
 import money.terra.key.RawKey
 import money.terra.wallet.TerraWallet
 import kotlin.test.Test
@@ -41,6 +42,27 @@ class SignatureTest {
                 "text",
                 "XUS608ydbfZ/acnQdlJzFOflrmkv1IuqZlWS3O+ZUZZFC98LO2BiGUbfAv4rtN/uKrzGy8lERwWWNGC9opgjXA=="
             )
+        }
+    }
+
+    @Test
+    fun succeedRecoverPublicKeyFromSignature() {
+        val publicKey = PublicKey.recoverFromSignature(
+            "text",
+            "XUS608ydbfZ/acnQdlJzFOflrmkv1IuqZlWS3O+ZUZZFC98LO2BiGUbfAv4rtN/uKrzGy8lERwWWNGC9opgjXA==",
+        )
+
+        assertTrue {
+            publicKey.verify(
+                "text",
+                "XUS608ydbfZ/acnQdlJzFOflrmkv1IuqZlWS3O+ZUZZFC98LO2BiGUbfAv4rtN/uKrzGy8lERwWWNGC9opgjXA==",
+            )
+        }
+
+        val wallet = TerraWallet.fromRawKey(NORMAL.privateKeyHex)
+
+        assertTrue {
+            publicKey.publicKey.contentEquals(wallet.key?.publicKey)
         }
     }
 

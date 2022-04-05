@@ -9,6 +9,7 @@ import kr.jadekim.common.hash.SHA_256
 import money.terra.util.Bip32
 import money.terra.util.Bip32KeyPair
 import money.terra.util.Mnemonic
+import kotlin.jvm.JvmStatic
 
 interface Key {
 
@@ -26,6 +27,20 @@ interface Key {
 }
 
 open class PublicKey(override val publicKey: ByteArray) : Key {
+
+    companion object {
+
+        @JvmStatic
+        fun recoverFromSignature(message: ByteArray, signature: ByteArray) = PublicKey(
+            Bip32.recoverPublicKey(SHA_256.hash(message), signature)
+        )
+
+        @JvmStatic
+        fun recoverFromSignature(message: String, signature: ByteArray) = recoverFromSignature(message.utf8(), signature)
+
+        @JvmStatic
+        fun recoverFromSignature(message: String, signature: String) = recoverFromSignature(message.utf8(), signature.decodeBase64())
+    }
 
     override fun sign(message: ByteArray): Deferred<ByteArray> {
         throw NotImplementedError()
