@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.bitcoinj.core;
+package money.terra.library.bech32;
 
 public class AddressFormatException extends IllegalArgumentException {
     public AddressFormatException() {

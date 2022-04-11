@@ -1,6 +1,6 @@
 package money.terra.util
 
-import io.nayuki.bitcoin.crypto.Ripemd160
+import money.terra.library.ripemd160.Ripemd160
 
 actual object Ripemd160 {
 

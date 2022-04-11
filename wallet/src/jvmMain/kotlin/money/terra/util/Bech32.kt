@@ -1,6 +1,6 @@
 package money.terra.util
 
-import org.bitcoinj.core.Bech32 as Bech32Lib
+import money.terra.library.bech32.Bech32 as Bech32Lib
 
 actual object Bech32 {
 

@@ -8,7 +8,7 @@
  * MIT license
  */
 
-package io.nayuki.bitcoin.crypto;
+package money.terra.library.ripemd160;
 
 import static java.lang.Integer.rotateLeft;
 import java.util.Arrays;

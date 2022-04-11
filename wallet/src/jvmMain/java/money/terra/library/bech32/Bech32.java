@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package org.bitcoinj.core;
+package money.terra.library.bech32;
 
 import java.io.ByteArrayOutputStream;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Locale;
 
