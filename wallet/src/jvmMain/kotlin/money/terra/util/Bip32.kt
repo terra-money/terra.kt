@@ -53,9 +53,10 @@ actual object Bip32 {
         val (r, s) = splitRandS(signature)
         val signatureData = Sign.SignatureData(byteArrayOf(27.toByte()), r, s)
         val uncompressedPublicKey = Sign.signedMessageHashToKey(messageHash, signatureData).toByteArray()
-        val encodedPublicKey = ByteArray(uncompressedPublicKey.size + 1)
+
+        val encodedPublicKey = ByteArray(65)
+        uncompressedPublicKey.copyInto(encodedPublicKey, 65 - uncompressedPublicKey.size)
         encodedPublicKey[0] = 0x04
-        uncompressedPublicKey.copyInto(encodedPublicKey, 1)
 
         val point = CURVE.curve.decodePoint(encodedPublicKey)
 

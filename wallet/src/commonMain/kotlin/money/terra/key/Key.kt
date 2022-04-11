@@ -23,6 +23,8 @@ interface Key {
 
     fun verify(message: String, signature: ByteArray) = verify(message.utf8(), signature)
 
+    fun verify(message: ByteArray, signature: String) = verify(message, signature.decodeBase64())
+
     fun verify(message: String, signature: String) = verify(message.utf8(), signature.decodeBase64())
 }
 
@@ -37,6 +39,9 @@ open class PublicKey(override val publicKey: ByteArray) : Key {
 
         @JvmStatic
         fun recoverFromSignature(message: String, signature: ByteArray) = recoverFromSignature(message.utf8(), signature)
+
+        @JvmStatic
+        fun recoverFromSignature(message: ByteArray, signature: String) = recoverFromSignature(message, signature.decodeBase64())
 
         @JvmStatic
         fun recoverFromSignature(message: String, signature: String) = recoverFromSignature(message.utf8(), signature.decodeBase64())

@@ -1,5 +1,6 @@
 package money.terra.wallet.test
 
+import kr.jadekim.common.encoder.decodeBase64
 import kr.jadekim.common.encoder.encodeBase64
 import money.terra.key.PublicKey
 import money.terra.key.RawKey
@@ -63,6 +64,23 @@ class SignatureTest {
 
         assertTrue {
             publicKey.publicKey.contentEquals(wallet.key?.publicKey)
+        }
+    }
+
+    @Test
+    fun succeedRecover65bytesPublicKey() {
+        val text =
+            "MTY0OTE2OTE1MzMyMXRlcnJhMXV0YXRlOTJkcWdld3BnaGZ5ZnB3eW5xejZsbTllcXJwcXVxdnA5eyJjYW1wYWlnbiI6InRlcnJhMThzaDI0OHd0dXAzemZkamNkanVsNDd1dmRneW40emM4YTNhOHpnIiwicnVsZSI6eyJ0eXBlIjoiQW5kIiwiY2hpbGRyZW4iOlt7InR5cGUiOiJCb29sZWFuTGl0ZXJhbCIsImNoaWxkcmVuIjpbXSwiZGF0YSI6InRydWUifSx7InR5cGUiOiJCb29sZWFuTGl0ZXJhbCIsImNoaWxkcmVuIjpbXSwiZGF0YSI6InRydWUifSx7InR5cGUiOiJCb29sZWFuTGl0ZXJhbCIsImNoaWxkcmVuIjpbXSwiZGF0YSI6InRydWUifV0sImRhdGEiOiJ0cnVlIn19".decodeBase64()
+
+        val publicKey = PublicKey.recoverFromSignature(
+            text,
+            "+M3CoRvhoIH7PTCw4A2nNtGONBUO0NToHK03830VG01cpnk68oWL3FA7lYVRpL592YscV6oOG58eZ0tcdpzR6Q=="
+        )
+        assertTrue {
+            publicKey.verify(
+                text,
+                "+M3CoRvhoIH7PTCw4A2nNtGONBUO0NToHK03830VG01cpnk68oWL3FA7lYVRpL592YscV6oOG58eZ0tcdpzR6Q=="
+            )
         }
     }
 
