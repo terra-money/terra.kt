@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package shadow.org.bitcoinj.core;
+package money.terra.library.bech32;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
