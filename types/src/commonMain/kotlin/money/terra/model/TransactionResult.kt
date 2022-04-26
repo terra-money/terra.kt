@@ -19,6 +19,7 @@ data class TransactionResult(
     val code: Int? = null,
     @Contextual val data: Binary? = null,
     val logs: List<TransactionLog>? = null,
+    val events: List<TransactionEvent>? = null,
 ) {
 
     val isSuccess = code == null || code == 0

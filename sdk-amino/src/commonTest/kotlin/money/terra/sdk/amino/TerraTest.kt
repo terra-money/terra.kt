@@ -1,6 +1,6 @@
 package money.terra.sdk.amino
 
-import io.ktor.client.features.logging.*
+import io.ktor.client.plugins.logging.*
 import money.terra.client.rest.HttpClient
 import money.terra.client.rest.fcd.TerraFcdClient
 import money.terra.message.SendMessage
@@ -9,8 +9,8 @@ import money.terra.sdk.tools.transaction.broadcaster.BroadcastException
 import money.terra.sdk.tools.transaction.broadcaster.isSuccess
 import money.terra.type.Uint128
 import util.runBlockingTest
-import kotlin.test.Test
 import kotlin.test.AfterTest
+import kotlin.test.Test
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 

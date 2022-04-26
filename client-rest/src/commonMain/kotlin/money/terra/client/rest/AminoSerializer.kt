@@ -1,9 +1,12 @@
 package money.terra.client.rest
 
-import io.ktor.client.features.json.*
 import io.ktor.http.*
 import io.ktor.http.content.*
+import io.ktor.serialization.*
+import io.ktor.util.*
 import io.ktor.util.reflect.*
+import io.ktor.utils.io.*
+import io.ktor.utils.io.charsets.*
 import io.ktor.utils.io.core.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.InternalSerializationApi
@@ -14,25 +17,27 @@ import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.serializer
 import money.terra.amino.AminoFormat
 
-object AminoSerializer : JsonSerializer {
+object AminoSerializer : ContentConverter {
 
-    override fun write(data: Any, contentType: ContentType): OutgoingContent {
-        @Suppress("UNCHECKED_CAST")
-        return TextContent(writeContent(data), contentType)
-    }
+    override suspend fun serialize(
+        contentType: ContentType,
+        charset: Charset,
+        typeInfo: TypeInfo,
+        value: Any
+    ): OutgoingContent {
+        val serializer = buildSerializer(value, AminoFormat.serializersModule)
+        val content =  AminoFormat.encodeToString(serializer, value)
 
-    internal fun writeContent(data: Any): String {
-        val serializer = buildSerializer(data, AminoFormat.serializersModule)
-
-        return AminoFormat.encodeToString(serializer, data)
+        return TextContent(content, contentType)
     }
 
     @OptIn(InternalSerializationApi::class, ExperimentalSerializationApi::class)
-    override fun read(type: TypeInfo, body: Input): Any {
-        val text = body.readText()
-        val deserializationStrategy = AminoFormat.serializersModule.getContextual(type.type)
-        val mapper = deserializationStrategy ?: (type.kotlinType?.let { serializer(it) } ?: type.type.serializer())
-        return AminoFormat.decodeFromString(mapper, text)!!
+    override suspend fun deserialize(charset: Charset, typeInfo: TypeInfo, content: ByteReadChannel): Any? {
+        val text = String(content.toByteArray(), charset=charset)
+        val deserializationStrategy = AminoFormat.serializersModule.getContextual(typeInfo.type)
+        val mapper = deserializationStrategy ?: (typeInfo.kotlinType?.let { serializer(it) } ?: typeInfo.type.serializer())
+
+        return AminoFormat.decodeFromString(mapper, text)
     }
 }
 

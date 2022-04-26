@@ -1,12 +1,12 @@
 plugins {
-    kotlin("multiplatform") version "1.6.10"
-    id("org.jetbrains.dokka") version "1.6.10"
+    kotlin("multiplatform") version "1.6.21"
+    id("org.jetbrains.dokka") version "1.6.20"
     id("maven-publish")
     id("signing")
 }
 
 group = "money.terra"
-version = "0.20.5"
+version = "0.20.6-alpha1"
 
 allprojects {
     apply {
@@ -18,6 +18,7 @@ allprojects {
 
     repositories {
         mavenCentral()
+        mavenLocal()
     }
 
     group = rootProject.group
@@ -26,7 +27,7 @@ allprojects {
     kotlin {
         jvm {
             compilations.all {
-                kotlinOptions.jvmTarget = "1.8"
+                kotlinOptions.jvmTarget = "11"
             }
             testRuns["test"].executionTask.configure {
                 useJUnitPlatform()

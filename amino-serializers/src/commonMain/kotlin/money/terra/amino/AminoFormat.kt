@@ -12,7 +12,6 @@ import kotlinx.serialization.modules.plus
 import money.terra.amino.serializer.message.MessageSerializersModule
 import money.terra.amino.serializer.type.TypeSerializersModule
 
-@OptIn(ExperimentalSerializationApi::class)
 object AminoFormat : StringFormat {
 
     override val serializersModule: SerializersModule

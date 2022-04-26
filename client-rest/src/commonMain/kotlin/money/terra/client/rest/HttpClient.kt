@@ -1,10 +1,11 @@
 package money.terra.client.rest
 
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.engine.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
-import io.ktor.client.features.logging.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -37,8 +38,12 @@ class HttpClient(
     val server = HttpClient(ENGINE_FACTORY.engine) {
         engine(ENGINE_FACTORY.configure)
 
-        install(JsonFeature) {
-            serializer = AminoSerializer
+        expectSuccess = true
+
+        addDefaultResponseValidation()
+
+        install(ContentNegotiation) {
+            register(ContentType.Application.Json, AminoSerializer)
         }
 
         install(HttpTimeout) {
@@ -62,9 +67,9 @@ class HttpClient(
 
         return async {
             try {
-                server.get(baseUrl + path + query)
+                server.get(baseUrl + path + query).body()
             } catch (e: ResponseException) {
-                throw RestClientResponseException(e.response.status.value, e.response.readText(), e)
+                throw RestClientResponseException(e.response.status.value, e.response.bodyAsText(), e)
             }
         }
     }
@@ -76,11 +81,10 @@ class HttpClient(
         try {
             server.post(baseUrl + path) {
                 contentType(ContentType.Application.Json)
-
-                this.body = body
-            }
+                setBody(body)
+            }.body()
         } catch (e: ResponseException) {
-            throw RestClientResponseException(e.response.status.value, e.response.readText(), e)
+            throw RestClientResponseException(e.response.status.value, e.response.bodyAsText(), e)
         }
     }
 }
