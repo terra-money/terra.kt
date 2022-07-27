@@ -2,7 +2,7 @@ package money.terra.sdk.wallet
 
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
-import money.terra.model.Transaction
+import money.terra.model.StdTx
 import money.terra.sdk.TerraBase
 import money.terra.sdk.tools.transaction.AccountInfo
 import money.terra.wallet.TerraWallet
@@ -13,7 +13,7 @@ abstract class ConnectedTerraWallet(val terra: TerraBase, val origin: TerraWalle
 
     @JvmOverloads
     open fun broadcast(
-        transaction: Transaction,
+        transaction: StdTx,
         gasAmount: Long? = null,
         feeDenomination: String? = null,
         accountNumber: Long? = null,
@@ -36,9 +36,9 @@ abstract class ConnectedTerraWallet(val terra: TerraBase, val origin: TerraWalle
         accountNumber: Long? = null,
         sequence: Long? = null,
         coroutineContext: CoroutineContext = Dispatchers.Default,
-        transactionBuilder: Transaction.Builder.() -> Unit,
+        transactionBuilder: StdTx.Builder.() -> Unit,
     ) = broadcast(
-        Transaction.builder().apply(transactionBuilder).build(),
+        StdTx.builder().apply(transactionBuilder).build(),
         gasAmount,
         feeDenomination,
         accountNumber,
@@ -46,5 +46,5 @@ abstract class ConnectedTerraWallet(val terra: TerraBase, val origin: TerraWalle
         coroutineContext,
     )
 
-    abstract fun getAccountInfo(): Deferred<AccountInfo>
+    abstract fun getAccountInfo(): Deferred<AccountInfo?>
 }

@@ -1,10 +1,15 @@
 package money.terra.model
 
 import kotlinx.serialization.Serializable
-import money.terra.model.Attribute
 
 @Serializable
-data class TransactionEvent(
+data class TransactionStringEvent(
     val type: String,
-    val attributes: List<Attribute>,
+    val attributes: List<StringAttribute>,
+)
+
+@Serializable
+data class TransactionBinaryEvent(
+    val type: String,
+    val attributes: List<BinaryAttribute>,
 )

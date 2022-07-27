@@ -6,7 +6,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.LongAsStringSerializer
 import kotlinx.serialization.json.JsonObject
 import money.terra.model.Coin
-import money.terra.model.EnumMessage
 import money.terra.model.Message
 import money.terra.type.Binary
 
@@ -17,16 +16,10 @@ data class StoreCodeMessage(
 ) : Message()
 
 @Serializable
-data class MigrateCodeMessage(
-    @SerialName("code_id") @Serializable(LongAsStringSerializer::class) val codeId: Long,
-    val sender: String,
-    @SerialName("wasm_byte_code") @Contextual val wasmByteCode: Binary,
-) : Message()
-
-@Serializable
 data class InstantiateContractMessage(
     val sender: String,
     @SerialName("code_id") @Serializable(LongAsStringSerializer::class) val codeId: Long,
+    val label: String,
     @SerialName("init_msg") val message: JsonObject,
     @SerialName("init_coins") val funds: List<Coin> = emptyList(),
     val admin: String? = null,
@@ -59,12 +52,6 @@ data class MigrateContractMessage(
 @Serializable
 data class UpdateContractAdminMessage(
     val admin: String,
-    val newAdmin: String,
-    val contract: String,
-) : Message()
-
-@Serializable
-data class ClearContractAdminMessage(
-    val admin: String,
+    @SerialName("new_admin") val newAdmin: String,
     val contract: String,
 ) : Message()

@@ -14,7 +14,6 @@ data class ParameterChangeProposal(
     data class Change(
         val subspace: String,
         val key: String,
-        val subkey: String,
         val value: String,
     )
 }

@@ -3,6 +3,7 @@ package money.terra.sdk
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import money.terra.key.MnemonicKey.Companion.COIN_TYPE
+import money.terra.model.TransactionResponse
 import money.terra.model.TransactionResult
 import money.terra.sdk.tools.transaction.broadcaster.BroadcastResult
 import money.terra.sdk.tools.transaction.broadcaster.Broadcaster
@@ -12,7 +13,7 @@ import kotlin.coroutines.CoroutineContext
 
 abstract class TerraBase(
     val chainId: String,
-    val broadcaster: Broadcaster<out BroadcastResult>,
+    val broadcaster: Broadcaster,
 ) {
 
     abstract fun connect(wallet: TerraWallet): ConnectedTerraWallet
@@ -38,7 +39,7 @@ abstract class TerraBase(
 
     abstract fun getTransaction(
         transactionHash: String,
-    ): Deferred<TransactionResult?>
+    ): Deferred<TransactionResponse?>
 
     open fun waitTransaction(
         transactionHash: String,

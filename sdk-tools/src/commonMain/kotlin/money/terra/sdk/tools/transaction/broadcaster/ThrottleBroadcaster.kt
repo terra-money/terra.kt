@@ -5,19 +5,21 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.sync.Semaphore
 import kr.jadekim.common.extension.sequentialGroupBy
 import money.terra.model.Message
+import money.terra.model.StdTx
 import money.terra.model.Transaction
+import money.terra.model.TransactionResponse
 import money.terra.wallet.TerraWallet
 import kotlin.coroutines.CoroutineContext
 
-class ThrottleBroadcaster<Result : BroadcastResult>(
-    private val delegate: Broadcaster<Result>,
-    val queue: BroadcastQueue<Result> = LocalBroadcastQueue(),
+class ThrottleBroadcaster(
+    private val delegate: Broadcaster,
+    val queue: BroadcastQueue = LocalBroadcastQueue(),
     @Suppress("CanBeParameter") val broadcastLockReleaser: BroadcastLockReleaser = StaticIntervalBroadcastLockReleaser(6),
     var messageWaitMillis: Long = 0,
     val maxTransactionPerBlock: Int = Int.MAX_VALUE,
     val maxMessagePerTransaction: Int = Int.MAX_VALUE,
     override val coroutineContext: CoroutineContext = Dispatchers.Default,
-) : Broadcaster<Result>(
+) : Broadcaster(
     delegate.chainId,
     delegate.signer,
     delegate.accountInfoProvider,
@@ -52,7 +54,10 @@ class ThrottleBroadcaster<Result : BroadcastResult>(
     override suspend fun queryTransaction(transactionHash: String) = delegate.queryTransaction(transactionHash)
 
     //이미 서명된 트랜잭션을 지연시킬 경우 시퀀스 오류가 발생할 가능성이 있기 때문에 지연 대상에서 제외
-    override fun broadcast(transaction: Transaction, coroutineContext: CoroutineContext): Deferred<Result> {
+    override fun broadcast(
+        transaction: Transaction,
+        coroutineContext: CoroutineContext
+    ): Deferred<TransactionResponse> {
         return delegate.broadcast(transaction, coroutineContext)
     }
 
@@ -65,8 +70,8 @@ class ThrottleBroadcaster<Result : BroadcastResult>(
         accountNumber: Long?,
         sequence: Long?,
         coroutineContext: CoroutineContext,
-    ): Deferred<Pair<Result, Transaction>> {
-        val result = CompletableDeferred<Pair<Result, Transaction>>()
+    ): Deferred<Pair<TransactionResponse, Transaction>> {
+        val result = CompletableDeferred<Pair<TransactionResponse, Transaction>>()
         val queueItem = MessageQueueItem(
             senderWallet,
             message,
@@ -89,14 +94,14 @@ class ThrottleBroadcaster<Result : BroadcastResult>(
 
     override fun broadcast(
         senderWallet: TerraWallet,
-        transaction: Transaction,
+        transaction: StdTx,
         gasAmount: Long?,
         feeDenomination: String?,
         accountNumber: Long?,
         sequence: Long?,
         coroutineContext: CoroutineContext,
-    ): Deferred<Pair<Result, Transaction>> {
-        val result = CompletableDeferred<Pair<Result, Transaction>>()
+    ): Deferred<Pair<TransactionResponse, Transaction>> {
+        val result = CompletableDeferred<Pair<TransactionResponse, Transaction>>()
         val queueItem = TransactionQueueItem(
             senderWallet,
             transaction.copy(signatures = null),
@@ -119,9 +124,9 @@ class ThrottleBroadcaster<Result : BroadcastResult>(
     private suspend fun broadcast(
         wallet: TerraWallet,
         memo: String,
-        items: List<MessageQueueItem<Result>>
-    ): Pair<Result, Transaction> {
-        val transaction = Transaction.builder()
+        items: List<MessageQueueItem>
+    ): Pair<TransactionResponse, Transaction> {
+        val transaction = StdTx.builder()
             .memo(memo)
             .message(items.map { it.message })
             .build()
@@ -129,7 +134,7 @@ class ThrottleBroadcaster<Result : BroadcastResult>(
         return broadcast(wallet, transaction).await()
     }
 
-    private suspend fun broadcast(item: TransactionQueueItem<Result>): Pair<Result, Transaction> {
+    private suspend fun broadcast(item: TransactionQueueItem): Pair<TransactionResponse, Transaction> {
         return broadcast(item.wallet, item.transaction).await()
     }
 
@@ -171,8 +176,8 @@ class ThrottleBroadcaster<Result : BroadcastResult>(
         }
     }
 
-    private suspend fun popMessages(): List<MessageQueueItem<Result>> {
-        val items = mutableListOf<MessageQueueItem<Result>>()
+    private suspend fun popMessages(): List<MessageQueueItem> {
+        val items = mutableListOf<MessageQueueItem>()
 
         try {
             repeat(maxMessagePerTransaction) {
@@ -193,7 +198,7 @@ class ThrottleBroadcaster<Result : BroadcastResult>(
         return items
     }
 
-    private suspend fun popMessage(isFirst: Boolean = false): MessageQueueItem<Result>? {
+    private suspend fun popMessage(isFirst: Boolean = false): MessageQueueItem? {
         if (isFirst) {
             return queue.popMessage()
         }
@@ -218,51 +223,51 @@ class ThrottleBroadcaster<Result : BroadcastResult>(
     }
 }
 
-interface BroadcastQueue<Result : BroadcastResult> {
+interface BroadcastQueue {
 
-    suspend fun popTransaction(): TransactionQueueItem<Result>
+    suspend fun popTransaction(): TransactionQueueItem
 
-    suspend fun pushTransaction(item: TransactionQueueItem<Result>)
+    suspend fun pushTransaction(item: TransactionQueueItem)
 
-    suspend fun popMessage(): MessageQueueItem<Result>
+    suspend fun popMessage(): MessageQueueItem
 
-    suspend fun pushMessage(item: MessageQueueItem<Result>)
+    suspend fun pushMessage(item: MessageQueueItem)
 
     suspend fun isEmptyMessageQueue(): Boolean
 }
 
-class LocalBroadcastQueue<Result : BroadcastResult>(
-    private val transactionQueue: Channel<TransactionQueueItem<Result>> = Channel(),
-    private val messageQueue: Channel<MessageQueueItem<Result>> = Channel(),
-) : BroadcastQueue<Result> {
+class LocalBroadcastQueue(
+    private val transactionQueue: Channel<TransactionQueueItem> = Channel(),
+    private val messageQueue: Channel<MessageQueueItem> = Channel(),
+) : BroadcastQueue {
 
-    override suspend fun popTransaction(): TransactionQueueItem<Result> = transactionQueue.receive()
+    override suspend fun popTransaction(): TransactionQueueItem = transactionQueue.receive()
 
-    override suspend fun pushTransaction(item: TransactionQueueItem<Result>) = transactionQueue.send(item)
+    override suspend fun pushTransaction(item: TransactionQueueItem) = transactionQueue.send(item)
 
-    override suspend fun popMessage(): MessageQueueItem<Result> = messageQueue.receive()
+    override suspend fun popMessage(): MessageQueueItem = messageQueue.receive()
 
-    override suspend fun pushMessage(item: MessageQueueItem<Result>) = messageQueue.send(item)
+    override suspend fun pushMessage(item: MessageQueueItem) = messageQueue.send(item)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun isEmptyMessageQueue(): Boolean = messageQueue.isEmpty
 }
 
-data class TransactionQueueItem<Result : BroadcastResult>(
+data class TransactionQueueItem(
     val wallet: TerraWallet,
-    val transaction: Transaction,
+    val transaction: StdTx,
     val gasAmount: Long?,
     val feeDenomination: String?,
-    val result: CompletableDeferred<Pair<Result, Transaction>>,
+    val result: CompletableDeferred<Pair<TransactionResponse, Transaction>>,
 )
 
-data class MessageQueueItem<Result : BroadcastResult>(
+data class MessageQueueItem(
     val wallet: TerraWallet,
     val message: Message,
     val memo: String,
     val gasAmount: Long?,
     val feeDenomination: String?,
-    val result: CompletableDeferred<Pair<Result, Transaction>>,
+    val result: CompletableDeferred<Pair<TransactionResponse, Transaction>>,
 )
 
 interface BroadcastLockReleaser {

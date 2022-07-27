@@ -2,11 +2,13 @@ package money.terra.sdk.amino
 
 import io.ktor.client.plugins.logging.*
 import money.terra.client.rest.HttpClient
-import money.terra.client.rest.fcd.TerraFcdClient
+import money.terra.client.rest.lcd.TerraLcdClient
 import money.terra.message.SendMessage
 import money.terra.model.Coin
+import money.terra.sdk.tools.transaction.StaticGasPricesProvider
 import money.terra.sdk.tools.transaction.broadcaster.BroadcastException
 import money.terra.sdk.tools.transaction.broadcaster.isSuccess
+import money.terra.type.Decimal
 import money.terra.type.Uint128
 import util.runBlockingTest
 import kotlin.test.AfterTest
@@ -16,11 +18,15 @@ import kotlin.test.assertTrue
 
 class TerraTest {
 
-    private val client = HttpClient("https://bombay-fcd.terra.dev", logConfig = {
+    private val client = HttpClient("https://pisco-lcd.terra.dev", logConfig = {
         level = LogLevel.ALL
         logger = Logger.SIMPLE
     })
-    private val options = AminoTerraOptions("bombay-12", TerraFcdClient("bombay-12", client))
+    private val options = AminoTerraOptions(
+        chainId = "pisco-1",
+        client = TerraLcdClient("pisco-1", client),
+        gasPricesProvider = StaticGasPricesProvider(mapOf("uluna" to Decimal("0.15"))),
+    )
 
     @AfterTest
     fun delay() {

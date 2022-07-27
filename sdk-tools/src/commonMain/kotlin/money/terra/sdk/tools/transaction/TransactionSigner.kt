@@ -4,18 +4,29 @@ import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.LongAsStringSerializer
-import money.terra.model.Fee
-import money.terra.model.Message
-import money.terra.model.Signature
-import money.terra.model.Transaction
+import money.terra.key.Key
+import money.terra.model.*
+import money.terra.type.Binary
+import money.terra.type.Uint128
 import money.terra.wallet.TerraWallet
 
 interface TransactionSigner {
 
-    suspend fun sign(wallet: TerraWallet, data: TransactionSignData, transaction: Transaction): Signature
+    val signMode: SignMode
+
+    suspend fun sign(key: Key, data: TransactionSignDocument): ByteArray
 }
 
 @Serializable
+data class TransactionSignDocument(
+    val body: TransactionBody,
+    val authInfo: AuthInfo,
+    val chainId: String,
+    val accountNumber: Long,
+)
+
+@Serializable
+@Deprecated("Legacy format")
 data class TransactionSignData(
     @SerialName("chain_id") val chainId: String,
     @SerialName("account_number") @Serializable(LongAsStringSerializer::class) val accountNumber: Long,
@@ -26,7 +37,7 @@ data class TransactionSignData(
 ) {
 
     constructor(
-        transaction: Transaction,
+        transaction: StdTx,
         chainId: String,
         accountNumber: Long,
         sequence: Long,

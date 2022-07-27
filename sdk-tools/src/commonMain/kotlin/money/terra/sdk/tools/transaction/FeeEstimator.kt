@@ -1,19 +1,13 @@
 package money.terra.sdk.tools.transaction
 
-import money.terra.model.Coin
-import money.terra.model.CoinDecimal
-import money.terra.model.Fee
-import money.terra.model.Message
+import money.terra.model.*
 import money.terra.type.Decimal
 import money.terra.type.toDecimal
 import money.terra.type.toUint128
 
 class EstimateFeeException(
-    val messages: List<Message>,
-    val requesterAddress: String,
-    val requesterAccountNumber: Long,
-    val requesterSequence: Long,
-    val gasPrices: List<CoinDecimal>,
+    val transactionBody: TransactionBody,
+    val gasPrice: CoinDecimal,
     val gasAdjustment: Float,
     val reason: String,
     cause: Throwable? = null,
@@ -23,7 +17,7 @@ abstract class FeeEstimator {
 
     val gasPricesProvider: GasPricesProvider
 
-    var defaultGasAdjustment: Float = 1.4f
+    var defaultGasAdjustment: Float = 2f
     var defaultFeeDenomination: String = "uluna"
 
     constructor(gasPrices: Map<String, Decimal>) {
@@ -36,39 +30,28 @@ abstract class FeeEstimator {
 
     @Throws(EstimateFeeException::class)
     suspend fun estimate(
-        messages: List<Message>,
-        senderAddress: String,
-        senderAccountNumber: Long,
-        senderSequence: Long,
+        transactionBody: TransactionBody,
+        signers: List<Signer>,
         feeDenomination: String = defaultFeeDenomination,
         gasAdjustment: Float = defaultGasAdjustment,
     ): Fee {
         val gasPrice = gasPricesProvider.get(feeDenomination)
 
-        return estimate(
-            messages,
-            senderAddress,
-            senderAccountNumber,
-            senderSequence,
-            listOf(CoinDecimal(feeDenomination, gasPrice)),
-            gasAdjustment,
-        )
+        return estimate(transactionBody, signers, gasPrice, gasAdjustment)
     }
 
     suspend fun estimate(gasAmount: Long, feeDenomination: String = defaultFeeDenomination): Fee {
         val gasPrice = gasPricesProvider.get(feeDenomination)
-        val feeAmount = (gasAmount.toDecimal() * gasPrice).toUint128()
+        val feeAmount = (gasAmount.toDecimal() * gasPrice.amount).toUint128()
 
         return Fee(gasAmount, listOf(Coin(feeDenomination, feeAmount)))
     }
 
     @Throws(EstimateFeeException::class)
     protected abstract suspend fun estimate(
-        messages: List<Message>,
-        senderAddress: String,
-        senderAccountNumber: Long,
-        senderSequence: Long,
-        gasPrices: List<CoinDecimal>,
+        transactionBody: TransactionBody,
+        signers: List<Signer>,
+        gasPrice: CoinDecimal,
         gasAdjustment: Float,
     ): Fee
 }

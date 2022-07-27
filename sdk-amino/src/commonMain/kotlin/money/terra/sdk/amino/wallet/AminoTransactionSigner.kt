@@ -4,7 +4,7 @@ import kotlinx.serialization.json.*
 import money.terra.amino.AminoFormat
 import money.terra.model.PublicKey
 import money.terra.model.Signature
-import money.terra.model.Transaction
+import money.terra.model.StdTx
 import money.terra.sdk.tools.transaction.TransactionSignData
 import money.terra.sdk.tools.transaction.TransactionSigner
 import money.terra.type.toBinary
@@ -19,13 +19,13 @@ object AminoTransactionSigner : TransactionSigner {
         val key = wallet.key ?: throw IllegalArgumentException("${wallet.address} wallet have not key")
         val signature = key.sign(serializeSignData(data)).await()
 
-        return Signature(signature.toBinary(), PublicKey(key.publicKey.toBinary()), data.accountNumber, data.sequence)
+        return Signature(signature.toBinary(), PublicKey.Secp256k1(key.publicKey.toBinary()), data.accountNumber, data.sequence)
     }
 
     override suspend fun sign(
         wallet: TerraWallet,
         data: TransactionSignData,
-        transaction: Transaction,
+        transaction: StdTx,
     ): Signature = sign(wallet, data)
 
     fun serializeSignData(data: TransactionSignData): String {

@@ -4,8 +4,8 @@ import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import money.terra.type.Binary
 
-@Serializable
-data class PublicKey(
-    @Contextual val value: Binary,
-    val type: String = "tendermint/PubKeySecp256k1",
-)
+sealed class PublicKey(@Contextual val value: Binary) {
+    class Secp256k1(value: Binary) : PublicKey(value)
+
+    class Ed25519(value: Binary) : PublicKey(value)
+}

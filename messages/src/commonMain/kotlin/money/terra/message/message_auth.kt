@@ -54,7 +54,7 @@ data class SendAuthorization(
 
 @Serializable
 data class StakeAuthorization(
-    @SerialName("max_tokens") val maxTokens: List<Coin>,
+    @SerialName("max_tokens") val maxTokens: Coin,
     val validators: Validators,
     @SerialName("authorization_type") val authorizationType: AuthorizationType,
 ) : Authorization() {

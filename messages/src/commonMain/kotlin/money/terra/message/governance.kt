@@ -17,15 +17,24 @@ data class SubmitProposalMessage(
 
 @Serializable
 data class DepositProposalMessage(
-    @SerialName("proposal_id") val proposalId: String,
+    @SerialName("proposal_id") val proposalId: Long,
     val depositor: String,
     val amount: List<Coin>,
 ) : Message()
 
 @Serializable
 data class VoteProposalMessage(
-    @SerialName("proposal_id") val proposalId: String,
+    @SerialName("proposal_id") val proposalId: Long,
     val voter: String,
-    val option: String,
-) : Message()
+    val option: VoteOption,
+) : Message() {
 
+    @Serializable
+    enum class VoteOption {
+        YES,
+        ABSTAIN,
+        NO,
+        NO_WITH_VETO,
+        UNSPECIFIED,
+    }
+}

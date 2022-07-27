@@ -1,15 +1,15 @@
 package money.terra.sdk.tools.transaction.broadcaster
 
 import kotlinx.coroutines.*
-import money.terra.model.Message
-import money.terra.model.Transaction
-import money.terra.model.TransactionResult
+import money.terra.key.Key
+import money.terra.model.*
 import money.terra.sdk.tools.transaction.*
+import money.terra.type.Binary
 import money.terra.wallet.TerraWallet
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 
-abstract class Broadcaster<Result : BroadcastResult>(
+abstract class Broadcaster(
     var chainId: String,
     var signer: TransactionSigner,
     var accountInfoProvider: AccountInfoProvider? = null,
@@ -17,25 +17,84 @@ abstract class Broadcaster<Result : BroadcastResult>(
     var semaphore: SemaphoreProvider? = null,
 ) {
 
-    abstract suspend fun requestBroadcast(transaction: Transaction): Result
+    abstract suspend fun requestBroadcast(transaction: Transaction): TransactionResponse
 
-    abstract suspend fun queryTransaction(transactionHash: String): TransactionResult?
+    abstract suspend fun queryTransaction(transactionHash: String): TransactionResponse?
 
     open fun broadcast(
         transaction: Transaction,
         coroutineContext: CoroutineContext = Dispatchers.Default,
-    ): Deferred<Result> {
-        if (transaction.fee == null) {
+    ): Deferred<TransactionResponse> {
+        if (transaction.authInfo.fee.feeAmount.isEmpty()) {
             throw BroadcastException.EmptyFee
         }
 
-        if (!transaction.isSigned) {
+        if (transaction.authInfo.signerInfos.isEmpty() || transaction.signatures.isEmpty()) {
             throw BroadcastException.NotSigned
         }
 
         return CoroutineScope(coroutineContext).async {
             requestBroadcast(transaction)
         }
+    }
+
+    open fun broadcast(
+        senderWallet: TerraWallet,
+        transaction: StdTx,
+        gasAmount: Long? = null,
+        feeDenomination: String? = null,
+        accountNumber: Long? = null,
+        sequence: Long? = null,
+        coroutineContext: CoroutineContext = Dispatchers.Default,
+    ): Deferred<Pair<TransactionResponse, Transaction>> = CoroutineScope(coroutineContext).async {
+        @Suppress("LocalVariableName")
+        var _transaction = transaction.toModel(senderWallet.address)
+        val transactionBody = _transaction.body
+        val key = senderWallet.key ?: throw IllegalArgumentException("Wallet don't have a key")
+        var accountInfo: AccountInfo? = null
+        var signers: List<Signer>? = null
+
+        if (_transaction.authInfo.fee.feeAmount.isEmpty()) {
+            if (feeEstimator == null) {
+                throw BroadcastException.EmptyFee
+            }
+
+            accountInfo = getAccountInfo(senderWallet, sequence)
+            signers = listOf(Signer(PublicKey.Secp256k1(Binary(key.publicKey)), signer.signMode, accountInfo.sequence))
+
+            _transaction = try {
+                val fee = if (gasAmount == null) {
+                    transactionBody.estimateFee(signers, feeDenomination, coroutineContext = coroutineContext).await()
+                } else {
+                    estimateFee(gasAmount, feeDenomination, coroutineContext).await()
+                }
+
+                _transaction.copy(authInfo = _transaction.authInfo.copy(fee = fee))
+            } catch (e: EstimateFeeException) {
+                throw BroadcastException.FailedEstimateFee(e)
+            }
+        }
+
+        semaphore.lockWallet<TransactionResponse>(senderWallet.address) {
+            if (_transaction.signatures.isEmpty()) {
+                if (accountInfo == null) {
+                    accountInfo = getAccountInfo(senderWallet, sequence)
+                }
+                if (signers == null) {
+                    signers = listOf(Signer(PublicKey.Secp256k1(Binary(key.publicKey)), signer.signMode, accountInfo!!.sequence))
+                }
+
+                _transaction = transactionBody.sign(
+                    key,
+                    signers!!,
+                    accountInfo!!,
+                    _transaction.authInfo.fee,
+                    coroutineContext,
+                ).await()
+            }
+
+            broadcast(_transaction).await()
+        } to _transaction
     }
 
     open fun broadcast(
@@ -49,7 +108,7 @@ abstract class Broadcaster<Result : BroadcastResult>(
         coroutineContext: CoroutineContext = Dispatchers.Default,
     ) = broadcast(
         senderWallet,
-        Transaction(listOf(message), memo),
+        StdTx(listOf(message), memo),
         gasAmount,
         feeDenomination,
         accountNumber,
@@ -57,81 +116,13 @@ abstract class Broadcaster<Result : BroadcastResult>(
         coroutineContext,
     )
 
-    private suspend fun getAccountInfo(wallet: TerraWallet, accountNumber: Long?, sequence: Long?): AccountInfo =
-        coroutineScope {
-            val accountInfo = async(start = CoroutineStart.LAZY) {
-                accountInfoProvider?.get(wallet.address) ?: throw BroadcastException.UnknownAccountInfo
-            }
-
-            val info = AccountInfo(
-                wallet.address,
-                accountNumber ?: accountInfo.await().accountNumber,
-                null,
-                sequence ?: accountInfo.await().sequence,
-            )
-
-            if (!accountInfo.isCompleted) {
-                accountInfo.cancel()
-            }
-
-            info
-        }
-
-    open fun broadcast(
-        senderWallet: TerraWallet,
-        transaction: Transaction,
-        gasAmount: Long? = null,
-        feeDenomination: String? = null,
-        accountNumber: Long? = null,
-        sequence: Long? = null,
-        coroutineContext: CoroutineContext = Dispatchers.Default,
-    ): Deferred<Pair<Result, Transaction>> = CoroutineScope(coroutineContext).async {
-        @Suppress("LocalVariableName")
-        var _transaction = transaction
-        var accountInfo: AccountInfo? = null
-
-        if (_transaction.fee == null) {
-            if (feeEstimator == null) {
-                throw BroadcastException.EmptyFee
-            }
-
-            accountInfo = getAccountInfo(senderWallet, accountNumber, sequence)
-
-            _transaction = try {
-                if (gasAmount == null) {
-                    _transaction.estimateFee(accountInfo, feeDenomination).await()
-                } else {
-                    _transaction.estimateFee(gasAmount, feeDenomination).await()
-                }
-            } catch (e: EstimateFeeException) {
-                throw BroadcastException.FailedEstimateFee(e)
-            }
-        }
-
-        semaphore.lockWallet<Result>(senderWallet.address) {
-            if (!_transaction.isSigned) {
-                if (accountInfo == null) {
-                    accountInfo = getAccountInfo(senderWallet, accountNumber, sequence)
-                }
-
-                _transaction = _transaction.sign(
-                    senderWallet,
-                    accountInfo!!.accountNumber,
-                    accountInfo!!.sequence,
-                ).await()
-            }
-
-            broadcast(_transaction).await()
-        } to _transaction
-    }
-
     fun wait(
         transactionHash: String,
         intervalMillis: Long = 1000,
         initialMillis: Long = 6000,
         maxCheckCount: Int? = null,
         coroutineContext: CoroutineContext = Dispatchers.Default,
-    ): Deferred<TransactionResult> = CoroutineScope(coroutineContext).async {
+    ): Deferred<TransactionResponse> = CoroutineScope(coroutineContext).async {
         repeat(maxCheckCount ?: Int.MAX_VALUE) {
             val transactionResult = queryTransaction(transactionHash)
 
@@ -147,8 +138,8 @@ abstract class Broadcaster<Result : BroadcastResult>(
 
     protected suspend fun <T> SemaphoreProvider?.lockWallet(
         address: String,
-        block: suspend () -> Result,
-    ): Result {
+        block: suspend () -> TransactionResponse,
+    ): TransactionResponse {
         if (this == null) {
             return block()
         }
@@ -160,57 +151,62 @@ abstract class Broadcaster<Result : BroadcastResult>(
             throw e
         }
 
-        when {
-            result.isSuccess -> accountInfoProvider?.increaseSequence(address)
-            result.code == 4 -> accountInfoProvider?.refreshSequence(address)
+        when (result.code) {
+            0 -> accountInfoProvider?.increaseSequence(address)
+            4 -> accountInfoProvider?.refreshSequence(address)
         }
 
         return result
     }
 
     @Throws(EstimateFeeException::class)
-    fun Transaction.estimateFee(
-        senderInfo: AccountInfo,
+    fun TransactionBody.estimateFee(
+        signers: List<Signer>,
         feeDenomination: String? = null,
         gasAdjustment: Float? = null,
-        dispatcher: CoroutineDispatcher = Dispatchers.Default,
-    ): Deferred<Transaction> = CoroutineScope(dispatcher).async {
-        val fee = feeEstimator!!.estimate(
-            messages,
-            senderInfo.address,
-            senderInfo.accountNumber,
-            senderInfo.sequence,
+        coroutineContext: CoroutineContext = Dispatchers.Default,
+    ): Deferred<Fee> = CoroutineScope(coroutineContext).async {
+        feeEstimator?.estimate(
+            this@estimateFee,
+            signers,
             feeDenomination ?: feeEstimator!!.defaultFeeDenomination,
             gasAdjustment ?: feeEstimator!!.defaultGasAdjustment,
-        )
-
-        this@estimateFee.copy(fee = fee, signatures = null)
+        ) ?: throw IllegalStateException("Not set FeeEstimator")
     }
 
     @Throws(EstimateFeeException::class)
-    fun Transaction.estimateFee(
+    fun estimateFee(
         gasAmount: Long,
         feeDenomination: String? = null,
-        dispatcher: CoroutineDispatcher = Dispatchers.Default,
-    ): Deferred<Transaction> = CoroutineScope(dispatcher).async {
-        val fee = feeEstimator!!.estimate(gasAmount, feeDenomination ?: feeEstimator!!.defaultFeeDenomination)
-
-        this@estimateFee.copy(fee = fee, signatures = null)
+        coroutineContext: CoroutineContext = Dispatchers.Default,
+    ): Deferred<Fee> = CoroutineScope(coroutineContext).async {
+        feeEstimator?.estimate(gasAmount, feeDenomination ?: feeEstimator!!.defaultFeeDenomination)
+            ?: throw IllegalStateException("Not set FeeEstimator")
     }
 
-    private fun Transaction.sign(
-        wallet: TerraWallet,
-        accountNumber: Long,
-        sequence: Long,
-        dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    private fun TransactionBody.sign(
+        key: Key,
+        signers: List<Signer>,
+        accountInfo: AccountInfo,
+        fee: Fee,
+        dispatcher: CoroutineContext = Dispatchers.Default,
     ): Deferred<Transaction> = CoroutineScope(dispatcher).async {
-        val signatures = signatures?.toMutableList() ?: mutableListOf()
+        val signatures = mutableListOf<Binary>()
+        val authInfo = AuthInfo(signers, fee)
+        val signData = TransactionSignDocument(this@sign, authInfo, chainId, accountInfo.accountNumber)
+        val signature = signer.sign(key, signData)
 
-        val signData = TransactionSignData(this@sign, chainId, accountNumber, sequence)
-        val signature = signer.sign(wallet, signData, this@sign)
+        signatures.add(Binary(signature))
 
-        signatures.add(signature)
+        Transaction(this@sign, authInfo, signatures)
+    }
 
-        copy(signatures = signatures)
+    private suspend fun getAccountInfo(
+        wallet: TerraWallet,
+        sequence: Long? = null,
+    ): AccountInfo {
+        val accountInfo = accountInfoProvider?.get(wallet.address) ?: throw BroadcastException.UnknownAccountInfo
+
+        return sequence?.let { accountInfo.copy(sequence = it) } ?: accountInfo
     }
 }
