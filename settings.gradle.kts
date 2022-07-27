@@ -4,8 +4,11 @@ include(
     "wallet",
     "types",
     "messages",
-    "amino-serializers",
-    "client-rest",
-    "sdk-amino",
+//    "amino-serializers",
+    "proto-serializers",
+//    "client-rest",
+    "client-grpc",
+//    "sdk-amino",
+    "sdk-proto",
     "sdk-tools"
 )

@@ -7,6 +7,7 @@ import money.terra.client.rest.TerraRestClient
 import money.terra.client.rest.lcd.TerraLcdClient
 import money.terra.type.Decimal
 
+@Deprecated("This client is developed for v1. Use grpc client", level = DeprecationLevel.ERROR)
 class TerraFcdClient(
     val chainId: String,
     val httpClient: HttpClient,

@@ -2,6 +2,7 @@ package money.terra.client.rest
 
 import money.terra.client.rest.api.*
 
+@Deprecated("This client is developed for v1. Use grpc client", level = DeprecationLevel.ERROR)
 interface TerraRestClient {
 
     @Deprecated("Legacy endpoint will deprecate. Use new proto style endpoints.")

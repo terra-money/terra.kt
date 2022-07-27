@@ -6,6 +6,7 @@ import money.terra.client.rest.TerraRestClient
 import money.terra.client.rest.lcd.api.*
 
 @Suppress("CanBeParameter")
+@Deprecated("This client is developed for v1. Use grpc client", level = DeprecationLevel.ERROR)
 open class TerraLcdClient(
     val chainId: String,
     val httpClient: HttpClient,

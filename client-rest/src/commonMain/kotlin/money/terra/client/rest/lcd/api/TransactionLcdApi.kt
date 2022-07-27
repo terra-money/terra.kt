@@ -11,7 +11,7 @@ import money.terra.client.rest.api.*
 import money.terra.client.rest.model.Result
 import money.terra.model.CoinDecimal
 import money.terra.model.Message
-import money.terra.model.Transaction
+import money.terra.model.StdTx
 import money.terra.model.TransactionResult
 
 @Deprecated("Legacy endpoint will deprecate. Use new proto style endpoints.")
@@ -34,15 +34,15 @@ class TransactionLcdApi(
         }
     }
 
-    override fun broadcastAsync(transaction: Transaction): Deferred<BroadcastAsyncResult> {
+    override fun broadcastAsync(transaction: StdTx): Deferred<BroadcastAsyncResult> {
         return client.post("/txs", BroadcastAsyncRequest(transaction))
     }
 
-    override fun broadcastSync(transaction: Transaction): Deferred<BroadcastSyncResult> {
+    override fun broadcastSync(transaction: StdTx): Deferred<BroadcastSyncResult> {
         return client.post("/txs", BroadcastSyncRequest(transaction))
     }
 
-    override fun broadcastBlock(transaction: Transaction): Deferred<BroadcastBlockResult> {
+    override fun broadcastBlock(transaction: StdTx): Deferred<BroadcastBlockResult> {
         return client.post("/txs", BroadcastBlockRequest(transaction))
     }
 

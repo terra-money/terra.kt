@@ -14,11 +14,11 @@ interface TransactionApi {
 
     fun getByHash(transactionHash: String): Deferred<TransactionResult?>
 
-    fun broadcastAsync(transaction: Transaction): Deferred<BroadcastAsyncResult>
+    fun broadcastAsync(transaction: StdTx): Deferred<BroadcastAsyncResult>
 
-    fun broadcastSync(transaction: Transaction): Deferred<BroadcastSyncResult>
+    fun broadcastSync(transaction: StdTx): Deferred<BroadcastSyncResult>
 
-    fun broadcastBlock(transaction: Transaction): Deferred<BroadcastBlockResult>
+    fun broadcastBlock(transaction: StdTx): Deferred<BroadcastBlockResult>
 
     fun estimateFee(
         messages: List<Message>,
@@ -31,27 +31,27 @@ interface TransactionApi {
 }
 
 interface BroadcastRequest {
-    val transaction: Transaction
+    val transaction: StdTx
     val mode: String
 }
 
 @Serializable
 class BroadcastSyncRequest(
-    @SerialName("tx") override val transaction: Transaction,
+    @SerialName("tx") override val transaction: StdTx,
 ) : BroadcastRequest {
     override val mode = "sync"
 }
 
 @Serializable
 class BroadcastAsyncRequest(
-    @SerialName("tx") override val transaction: Transaction,
+    @SerialName("tx") override val transaction: StdTx,
 ) : BroadcastRequest {
     override val mode = "async"
 }
 
 @Serializable
 class BroadcastBlockRequest(
-    @SerialName("tx") override val transaction: Transaction,
+    @SerialName("tx") override val transaction: StdTx,
 ) : BroadcastRequest {
     override val mode = "block"
 }

@@ -1,7 +1,7 @@
 package money.terra.client.rest.broadcaster
 
 import money.terra.client.rest.api.TransactionApi
-import money.terra.model.Transaction
+import money.terra.model.StdTx
 import money.terra.model.TransactionResult
 import money.terra.sdk.tools.transaction.AccountInfoProvider
 import money.terra.sdk.tools.transaction.FeeEstimator
@@ -19,7 +19,7 @@ class AsyncBroadcaster(
     semaphore: SemaphoreProvider? = null,
 ) : Broadcaster<BroadcastAsyncResult>(chainId, signer, accountInfoProvider, feeEstimator, semaphore) {
 
-    override suspend fun requestBroadcast(transaction: Transaction): BroadcastAsyncResult {
+    override suspend fun requestBroadcast(transaction: StdTx): BroadcastAsyncResult {
         return transactionApi.broadcastAsync(transaction).await().let {
             BroadcastAsyncResult(
                 it.transactionHash,

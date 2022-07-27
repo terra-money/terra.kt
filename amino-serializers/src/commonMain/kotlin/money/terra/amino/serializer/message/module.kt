@@ -100,13 +100,6 @@ val GovernanceSerializersModule = SerializersModule {
     }
 }
 
-val MarketSerializersModule = SerializersModule {
-    polymorphic(Message::class) {
-        subclass(SwapMessage::class, AminoSerializer(SwapMessage.serializer(), "market/MsgSwap"))
-        subclass(SwapSendMessage::class, AminoSerializer(SwapSendMessage.serializer(), "market/MsgSwapSend"))
-    }
-}
-
 val MessageAuthSerializersModule = SerializersModule {
     polymorphic(Message::class) {
         subclass(
@@ -134,31 +127,6 @@ val MessageAuthSerializersModule = SerializersModule {
         subclass(
             StakeAuthorization::class,
             AminoSerializer(StakeAuthorization.serializer(), "msgauth/StakeAuthorization"),
-        )
-    }
-}
-
-val OracleSerializersModule = SerializersModule {
-    polymorphic(Message::class) {
-        subclass(
-            ExchangeRatePrevoteMessage::class,
-            AminoSerializer(ExchangeRatePrevoteMessage.serializer(), "oracle/MsgExchangeRatePrevote"),
-        )
-        subclass(
-            ExchangeRateVoteMessage::class,
-            AminoSerializer(ExchangeRateVoteMessage.serializer(), "oracle/MsgExchangeRateVote"),
-        )
-        subclass(
-            DelegateFeedConsentMessage::class,
-            AminoSerializer(DelegateFeedConsentMessage.serializer(), "oracle/MsgDelegateFeedConsent"),
-        )
-        subclass(
-            AggregateExchangeRatePrevoteMessage::class,
-            AminoSerializer(AggregateExchangeRatePrevoteMessage.serializer(), "oracle/MsgAggregateExchangeRatePrevote"),
-        )
-        subclass(
-            AggregateExchangeRateVote::class,
-            AminoSerializer(AggregateExchangeRateVote.serializer(), "oracle/MsgAggregateExchangeRateVote"),
         )
     }
 }
@@ -191,7 +159,6 @@ val StakingSerializerModule = SerializersModule {
 val WasmSerializersModule = SerializersModule {
     polymorphic(Message::class) {
         subclass(StoreCodeMessage::class, AminoSerializer(StoreCodeMessage.serializer(), "wasm/MsgStoreCode"))
-        subclass(MigrateCodeMessage::class, AminoSerializer(MigrateCodeMessage.serializer(), "wasm/MsgMigrateCode"))
         subclass(
             InstantiateContractMessage::class,
             AminoSerializer(InstantiateContractMessage.serializer(), "wasm/MsgInstantiateContract"),
@@ -212,13 +179,9 @@ val WasmSerializersModule = SerializersModule {
             UpdateContractAdminMessage::class,
             AminoSerializer(UpdateContractAdminMessage.serializer(), "wasm/MsgUpdateContractAdmin"),
         )
-        subclass(
-            ClearContractAdminMessage::class,
-            AminoSerializer(ClearContractAdminMessage.serializer(), "wasm/MsgClearContractAdmin"),
-        )
     }
 }
 
 val MessageSerializersModule = BankSerializersModule + DistributionSerializersModule + FeeGrantSerializersModule +
-        GovernanceSerializersModule + MarketSerializersModule + MessageAuthSerializersModule + OracleSerializersModule +
-        SlashingSerializersModule + StakingSerializerModule + WasmSerializersModule
+        GovernanceSerializersModule + MessageAuthSerializersModule + SlashingSerializersModule +
+        StakingSerializerModule + WasmSerializersModule

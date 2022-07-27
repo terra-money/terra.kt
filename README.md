@@ -43,7 +43,7 @@ dependencies {
 }
 ```
 ```
-val client: TerraRestClient = TerraLcdClient("bombay-12", "https://bombay-lcd.terra.dev")
+val client: TerraRestClient = TerraLcdClient("pisco-1", "https://pisco-lcd.terra.dev")
 
 val deferredResult: Deferred<Result<Coin>> = client.marketApi.estimateSwapResult(Uint128("10000"), "uluna", "ukrw")
 val result: Coin = deferredResult.await().result
@@ -58,7 +58,7 @@ dependencies {
 ```
 ```
     val mnemonic: String = "..."
-    val terra = Terra.fcd("bombay-12", "https://bombay-fcd.terra.dev")
+    val terra = Terra.fcd("pisco-12", "https://pisco-fcd.terra.dev")
     val wallet: TerraWallet = terra.walletFromMnemonic(mnemonic)
     val receiveWallet: TerraWallet = TerraWallet("terra1x46rqay4d3cssq8gxxvqz8xt6nwlz4td20k38v")
     
@@ -93,7 +93,7 @@ dependencies {
 val mnemonic = "..."
 val wallet = TerraWallet.fromMnemonic(mnemonic)
 val signData = TransactionSignData(
-    chainId = "bombay-12",
+    chainId = "pisco-12",
     accountNumber = 0u,
     sequence = 0u,
     fee = Fee(200000u, listOf(Coin(Uint128("50"), "uluna"))),
